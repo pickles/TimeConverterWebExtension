@@ -2,10 +2,21 @@ import { DateTime } from "luxon";
 import { useStorage } from "@plasmohq/storage/hook";
 
 import { useEffect, useState } from "react";
-import Select from "react-select";
 import TZRow from "./TZRow";
 
-import "./style.css";
+import { 
+  Autocomplete,
+  Button,
+  Container, 
+  Group,
+  MantineProvider,
+  Table,
+  TextInput 
+} from "@mantine/core";
+import '@mantine/core/styles.css';
+
+// import 
+import mainContainerCss from './css/MainContainer.module.css';
 
 function IndexPopup() {
   const [now, setNow] = useState(DateTime.now());
@@ -14,6 +25,8 @@ function IndexPopup() {
   const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
   const [targetLocale, setTargetLocale] = useStorage("targetLocale", "en");
   
+  document.body.className = "w-[30rem]";
+
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(DateTime.now());
@@ -21,19 +34,7 @@ function IndexPopup() {
     return () => clearInterval(interval);
   }, []);
 
-  let options = Intl.supportedValuesOf("timeZone").map((tz) => { return {"value": tz, "label": tz} });
-
-  const handleTimezoneChanged = (selectedOption) => {
-    setSelectedTimezone(selectedOption.value);
-  };
-
-  const handleDateToConvertChanged = (e) => {
-    setDateToConvert(e.target.value);
-  };
-
-  const handleTargetLocaleChanged = (e) => {
-    setTargetLocale(e.target.value);
-  }
+  let options = Intl.supportedValuesOf("timeZone");
 
   const handleAddRow = () => {
     if (selectedTimezone === "") {
@@ -53,37 +54,46 @@ function IndexPopup() {
   }
 
   return (
-    <div className="w-[500px]">
-      <div>
-        <label>
-          DateToConvert: 
-          <input type="text" value={dateToConvert} onChange={handleDateToConvertChanged} />
-        </label>
-        <label>
-          Locale: 
-          <input type="text" value={targetLocale} onChange={handleTargetLocaleChanged} />
-        </label>
-      </div>
-      <Select
-        options={options}
-        onChange={handleTimezoneChanged}
-        isSearchable={true} />
-      <button onClick={handleAddRow}>Add</button>
-      <br/><br/>
-      <table className="w-[100%]">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Current</th>
-            <th>Converted</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {generateRows()}
-        </tbody>
-      </table>
-    </div>
+    <MantineProvider defaultColorScheme="auto">
+      <Container classNames={mainContainerCss}>
+        <Group>
+          <TextInput 
+            label="DateToConvert" 
+            styles={{input: {width: '25em'}}}
+            value={dateToConvert}
+            onChange={(e) => setDateToConvert(e.currentTarget.value)} />
+
+          <TextInput
+            label="Locale"
+            styles={{input: {maxWidth: '5em'}}}
+            value={targetLocale}
+            onChange={(e) => setTargetLocale(e.currentTarget.value)} />
+        </Group>
+
+        <Group styles={{root: {marginTop: '1em', marginBottom: '1em'}}}>
+          <Autocomplete
+            placeholder="Pick a timezone to convert"
+            styles={{input: {width: '25em'}}}
+            data={options}
+            onChange={setSelectedTimezone} />
+          <Button onClick={handleAddRow}>+</Button>
+        </Group>
+
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Name</Table.Th>
+              <Table.Th>Current</Table.Th>
+              <Table.Th>Converted</Table.Th>
+              <Table.Th></Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {generateRows()}
+          </Table.Tbody>
+        </Table>
+      </Container>
+    </MantineProvider>
   );
 }
 

@@ -1,6 +1,8 @@
 import { format, tzDate } from "@formkit/tempo";
 const parser = require('any-date-parser');
 import { DateTime, Settings } from 'luxon';
+import { MdDone, MdOutlineContentCopy } from 'react-icons/md';
+import { ActionIcon, CopyButton, Table, Tooltip } from '@mantine/core';
 
 function TZRow(props: {
     timezone: string, 
@@ -42,22 +44,46 @@ function TZRow(props: {
         props.onDelete(props.timezone);
     };
 
+    const copyText = (e: MouseEvent, text: string) => {
+        navigator.clipboard.writeText(text)
+    };
+
     // TODO: Add copy functionality
     return (
-        <tr>
-            <td>
+        <Table.Tr>
+            <Table.Td>
                 {props.timezone}
-            </td>
-            <td>
+            </Table.Td>
+            <Table.Td>
                 {current}
-            </td>
-            <td>
+                <CopyButton value={current}>
+                    {({copied, copy}) => (
+                        <Tooltip label={copied ? "Copied!" : "Copy to clipboard"} withArrow>
+                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"} color="auto">
+                                {copied ? <MdDone /> : <MdOutlineContentCopy />}
+                            </ActionIcon>
+                        </Tooltip>
+                    )}
+                </CopyButton>
+            </Table.Td>
+            <Table.Td>
                 {converted}
-            </td>
-            <td>
-                {props.timezone != "UTC" && <button onClick={handleDelete}>Delete</button>}
-            </td>
-        </tr>
+                { converted !== "-" && 
+                <CopyButton value={converted}>
+                    {({copied, copy}) => (
+                        <Tooltip label={copied ? "Copied!" : "Copy to clipboard"} withArrow>
+                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"} color="auto">
+                                {copied ? <MdDone /> : <MdOutlineContentCopy />}
+                            </ActionIcon>
+                        </Tooltip>
+                    )}
+                </CopyButton>
+                }
+            </Table.Td>
+            <Table.Td>
+                {props.timezone != "UTC" && <button className="my-button" onClick={handleDelete}>x</button>}
+            </Table.Td>
+        </Table.Tr>
     );
 }
 

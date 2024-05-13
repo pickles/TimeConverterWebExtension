@@ -1,14 +1,15 @@
-export {}
+import { Storage } from "@plasmohq/storage";
 
 console.log("Hello world from background script");
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
-        title: "Hello world",
+        title: "DateTime Converter",
         contexts: ["selection"],
-        id: "myIdIsSoCool"
+        id: "page.memo.DateTimeConverter.root"
     });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    console.log(info);
 });
