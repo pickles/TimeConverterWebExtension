@@ -1,6 +1,5 @@
-import { format, tzDate } from "@formkit/tempo";
 const parser = require('any-date-parser');
-import { DateTime, Settings } from 'luxon';
+import { DateTime } from 'luxon';
 import { MdDone, MdOutlineContentCopy } from 'react-icons/md';
 import { ActionIcon, CopyButton, Table, Tooltip } from '@mantine/core';
 
@@ -29,14 +28,14 @@ function TZRow(props: {
             }
 
             const parsed = parser.fromString(toConvert, props.locale) as Date;
-            console.log("Parsed", parsed);
-            console.log("Type:", typeof parsed);
+            // console.log("Parsed", parsed);
+            // console.log("Type:", typeof parsed);
             if ("invalid" in parsed) {
                 throw new Error("Could not paese the string as a date.");
             }
             converted = DateTime.fromJSDate(parsed).setZone(props.timezone).toFormat("yyyy-MM-dd HH:mm:ss") + " " + offsetName;
         } catch (e) {
-            console.error(e);
+            // console.error(e);
         }
     }
 
@@ -48,7 +47,8 @@ function TZRow(props: {
         navigator.clipboard.writeText(text)
     };
 
-    // TODO: Add copy functionality
+    const shouldShowDelete = props.timezone != "UTC" && props.onDelete != null;
+
     return (
         <Table.Tr>
             <Table.Td>
@@ -81,7 +81,7 @@ function TZRow(props: {
                 }
             </Table.Td>
             <Table.Td>
-                {props.timezone != "UTC" && <button className="my-button" onClick={handleDelete}>x</button>}
+                { shouldShowDelete && <button className="my-button" onClick={handleDelete}>x</button>}
             </Table.Td>
         </Table.Tr>
     );
