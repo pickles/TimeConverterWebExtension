@@ -4,6 +4,7 @@ import { BsClockHistory } from "react-icons/bs";
 import { useStorage } from "@plasmohq/storage/hook";
 import { useClickOutside } from "@mantine/hooks";
 import TZTable from "./TZTable";
+import '@mantine/core/styles.css';
 
 const CONTAINER_ELEMENT_ID = "page-memo-time-converter-root";
 
@@ -22,6 +23,7 @@ const Content = () => {
     const [rect, setRect] = useState(null);
 
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
+    const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
 
     useClickOutside(() => {
         setContentState("none")
@@ -84,33 +86,40 @@ const Content = () => {
         return (<></>);
     } else if (contentState === "icon") {
         return (
-            <MantineProvider>
-                <Container style={{
-                    position: 'absolute',
-                    left: left,
-                    top: top,
-                }}>
-                    <Tooltip label="Convert selected date" withArrow>
-                        <ActionIcon radius="x1" size="xl" onClick={handleIconClick} color="auto">
-                            <BsClockHistory />
-                        </ActionIcon>
-                    </Tooltip>
-                </Container>
-            </MantineProvider>
-        );
-    } else if (contentState === "dialog"){
-        return (
             <>
-                <MantineProvider defaultColorScheme="auto">
+                <MantineProvider defaultColorScheme="light">
                     <Container style={{
                         position: 'absolute',
                         left: left,
                         top: top,
-                        color: 'black',
-                        backgroundColor: 'white',
-                        border: '1px solid black',
+                        border: '1px solid',
                         borderRadius: '5px',
-                        minWidth: '40em'
+                        color: 'black',
+                        opacity: '1',
+                    }}>
+                        <Tooltip label="Convert selected date" withArrow>
+                            <ActionIcon radius="x1" size="xl" onClick={handleIconClick} color="auto">
+                                <BsClockHistory />
+                            </ActionIcon>
+                        </Tooltip>
+                    </Container>
+                </MantineProvider>
+            </>
+        );
+    } else if (contentState === "dialog"){
+        return (
+            <>
+                <MantineProvider defaultColorScheme="light">
+                    <Container style={{
+                        position: 'absolute',
+                        left: left,
+                        top: top,
+                        border: '1px solid',
+                        borderRadius: '5px',
+                        minWidth: '40em',
+                        opacity: '1',
+                        backgroundColor: '#eeeeee',
+                        color: 'black',
                         }}
                         size={"sm"}
                     >
@@ -118,6 +127,7 @@ const Content = () => {
                             targetTimezones={targetTimezones}
                             dateToConvert={selectedText}
                             targetLocale={"en"}
+                            defaultTimezone={defaultTimezone}
                     />
                     </Container>
                 </MantineProvider>

@@ -7,6 +7,7 @@ const TZTable = ({
     targetTimezones,
     dateToConvert,
     targetLocale,
+    defaultTimezone,
     handleDeleteRow=null
 }) => {
     const [now, setNow] = useState(DateTime.now());
@@ -25,7 +26,8 @@ const TZTable = ({
                 timezone={tz} 
                 now={now} 
                 dateToConvert={dateToConvert} 
-                locale={targetLocale} 
+                locale={targetLocale}
+                defaultTimezone={defaultTimezone}
                 onDelete={handleDeleteRow} />;
         });
     };

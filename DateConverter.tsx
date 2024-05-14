@@ -7,6 +7,7 @@ import { useStorage } from "@plasmohq/storage/hook";
 const DateConverter = () => {
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
     const [targetLocale, setTargetLocale] = useStorage("targetLocale", "en");
+    const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
 
     const [dateToConvert, setDateToConvert] = useState("");
     const [selectedTimezone, setSelectedTimezone] = useState("");
@@ -39,6 +40,13 @@ const DateConverter = () => {
                         styles={{input: {maxWidth: '5em'}}}
                         value={targetLocale}
                         onChange={(e) => setTargetLocale(e.currentTarget.value)} />
+                    
+                    <TextInput
+                        label="Default TZ"
+                        styles={{input: {maxWidth: '5em'}}}
+                        value={defaultTimezone}
+                        onChange={(e) => setDefaultTimezone(e.currentTarget.value)} />
+                    
                 </Group>
 
                 <Group styles={{root: {marginTop: '1em', marginBottom: '1em'}}}>
@@ -54,6 +62,7 @@ const DateConverter = () => {
                     targetTimezones={targetTimezones}
                     dateToConvert={dateToConvert}
                     targetLocale={targetLocale}
+                    defaultTimezone={defaultTimezone}
                     handleDeleteRow={handleDeleteTimezone} />
             </Container>
         </>

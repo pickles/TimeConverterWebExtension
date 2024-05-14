@@ -8,6 +8,7 @@ function TZRow(props: {
     now: DateTime, 
     dateToConvert: string,
     locale: string,
+    defaultTimezone: string,
     onDelete: Function
 }) {
     const currentDateTime = props.now.setZone(props.timezone) as DateTime;
@@ -26,13 +27,40 @@ function TZRow(props: {
                 toConvert = toConvert.replace(/@/,"").slice(0, 10);
                 toConvert = `@${toConvert}`;
             }
+            
+            let parsed = parser.fromString(toConvert, props.locale) as Date;
 
-            const parsed = parser.fromString(toConvert, props.locale) as Date;
-            // console.log("Parsed", parsed);
-            // console.log("Type:", typeof parsed);
-            if ("invalid" in parsed) {
-                throw new Error("Could not paese the string as a date.");
+            // any-date-parser attempt returns parsed object, it contains "offset" if the string contains timezone offset
+            const obj = parser.attempt(toConvert, props.locale);
+            // console.log("attempt",obj);
+            if ("invalid" in obj) {
+                throw new Error(`Could not paese the string as a date. ${toConvert}`);
             }
+            
+            if (!("day" in obj)) {
+                parsed.setUTCDate(props.now.day);
+            }
+            if (!("year" in obj)) {
+                parsed.setUTCFullYear(props.now.year);
+            }
+            if (!("month" in obj)) {
+                parsed.setUTCMonth(props.now.month - 1);
+            }
+
+            if (!("offset" in obj)) {
+                // If the string does not contain timezone offset, try to set timezone from default timezone
+                // console.log(`No offset in ${toConvert}`);
+                const toGetOffset = parser.attempt(`2000-01-01 00:00:00 ${props.defaultTimezone}`, props.locale);
+                if (!("invalid" in toGetOffset)) {
+                    const offset = toGetOffset.offset as number;
+                    if (typeof offset === 'number') {
+                        parsed = new Date(Number(parsed) - offset * 60 * 1000);    
+                    }
+                }
+            }
+
+
+            
             converted = DateTime.fromJSDate(parsed).setZone(props.timezone).toFormat("yyyy-MM-dd HH:mm:ss") + " " + offsetName;
         } catch (e) {
             // console.error(e);
@@ -59,7 +87,7 @@ function TZRow(props: {
                 <CopyButton value={current}>
                     {({copied, copy}) => (
                         <Tooltip label={copied ? "Copied!" : "Copy to clipboard"} withArrow>
-                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"} color="auto">
+                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"}>
                                 {copied ? <MdDone /> : <MdOutlineContentCopy />}
                             </ActionIcon>
                         </Tooltip>
@@ -72,7 +100,7 @@ function TZRow(props: {
                 <CopyButton value={converted}>
                     {({copied, copy}) => (
                         <Tooltip label={copied ? "Copied!" : "Copy to clipboard"} withArrow>
-                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"} color="auto">
+                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"}>
                                 {copied ? <MdDone /> : <MdOutlineContentCopy />}
                             </ActionIcon>
                         </Tooltip>
