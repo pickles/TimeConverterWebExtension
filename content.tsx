@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { BsClockHistory } from "react-icons/bs";
 import { useStorage } from "@plasmohq/storage/hook";
 import TZTable from "./TZTable";
-import '@mantine/core/styles.css';
 
 const isInsideDialog = (containerElement, mouseEvent) => {
     if (containerElement === null || containerElement === undefined) {
@@ -23,6 +22,7 @@ const Content = () => {
     const [rect, setRect] = useState(null);
 
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
+    const [targetLocale, setTargetLocale] = useStorage("targetLocale", "en");
     const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
 
     const containerElement = useRef(null);
@@ -113,15 +113,17 @@ const Content = () => {
                             border: '1px solid',
                             borderRadius: '5px',
                             minWidth: '40em',
+                            backgroundColor: 'white',
+                            color: 'black',
                         }}
                         size={"sm"}
                     >
-                    <TZTable 
-                            targetTimezones={targetTimezones}
-                            dateToConvert={selectedText}
-                            targetLocale={"en"}
-                            defaultTimezone={defaultTimezone}
-                    />
+                        <TZTable 
+                                targetTimezones={targetTimezones}
+                                dateToConvert={selectedText}
+                                targetLocale={targetLocale}
+                                defaultTimezone={defaultTimezone}
+                        />
                     </Container>
                 </MantineProvider>
             </>

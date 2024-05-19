@@ -6,7 +6,7 @@ import { MantineProvider } from "@mantine/core";
 function IndexPopup() {
  
   return (
-    <MantineProvider defaultColorScheme="auto">
+    <MantineProvider defaultColorScheme='auto'>
       <DateConverter />
     </MantineProvider>
   );

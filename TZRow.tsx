@@ -1,7 +1,7 @@
 const parser = require('any-date-parser');
 import { DateTime } from 'luxon';
 import { MdDone, MdOutlineContentCopy } from 'react-icons/md';
-import { ActionIcon, CopyButton, Table, Tooltip } from '@mantine/core';
+import { ActionIcon, Button, CopyButton, Table, Tooltip } from '@mantine/core';
 
 function TZRow(props: {
     timezone: string, 
@@ -109,7 +109,7 @@ function TZRow(props: {
                 }
             </Table.Td>
             <Table.Td>
-                { shouldShowDelete && <button className="my-button" onClick={handleDelete}>x</button>}
+                { shouldShowDelete && <button onClick={handleDelete}>x</button>}
             </Table.Td>
         </Table.Tr>
     );
