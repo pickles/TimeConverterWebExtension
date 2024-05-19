@@ -1,20 +1,20 @@
 import { ActionIcon, Container, MantineProvider, Tooltip } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsClockHistory } from "react-icons/bs";
 import { useStorage } from "@plasmohq/storage/hook";
-import { useClickOutside } from "@mantine/hooks";
 import TZTable from "./TZTable";
 import '@mantine/core/styles.css';
 
-const CONTAINER_ELEMENT_ID = "page-memo-time-converter-root";
-
-export const getRootContainer = () => {
-    console.log("getRootContainer");
-
-    const root = document.createElement("div");
-    root.id = CONTAINER_ELEMENT_ID;
-    document.body.after(root);
-    return root;
+const isInsideDialog = (containerElement, mouseEvent) => {
+    if (containerElement === null || containerElement === undefined) {
+        return false;
+    }
+    const rect = containerElement.getBoundingClientRect();
+    if (rect.left <= mouseEvent.clientX && mouseEvent.clientX <= rect.right && rect.top <= mouseEvent.clientY && mouseEvent.clientY <= rect.bottom) {
+        return true;
+    } else {
+        return false;
+    }
 };
 
 const Content = () => {
@@ -25,15 +25,18 @@ const Content = () => {
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
     const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
 
-    useClickOutside(() => {
-        setContentState("none")
-    }, null, [document.getElementById(CONTAINER_ELEMENT_ID)]);
+    const containerElement = useRef(null);
 
     const handleMouseUp = (e: MouseEvent) => {
         if (contentState === "icon") {
             setContentState("none");
         } else if (contentState === "dialog") {
-            return;
+            if (isInsideDialog(containerElement.current, e)) {
+                return;
+            } else {
+                setContentState("none");
+                return;
+            }
         }
 
         const selection = window.getSelection();
@@ -63,17 +66,6 @@ const Content = () => {
         setContentState("dialog");
     };
 
-    const handleAddRow = (selectedTimezone: string) => {
-        if (selectedTimezone === "") {
-            return;
-        }
-        setTargetTimezones([...targetTimezones, selectedTimezone]);
-    };
-
-    const handleDeleteRow = (timezone: string) => {
-        setTargetTimezones(targetTimezones.filter((tz) => tz !== timezone));
-    };
-
     let left: number = window.scrollX;
     let top: number = window.scrollY;
 
@@ -87,8 +79,10 @@ const Content = () => {
     } else if (contentState === "icon") {
         return (
             <>
-                <MantineProvider defaultColorScheme="light">
-                    <Container style={{
+                <MantineProvider>
+                    <Container 
+                        ref={containerElement}
+                        style={{
                         position: 'absolute',
                         left: left,
                         top: top,
@@ -109,17 +103,16 @@ const Content = () => {
     } else if (contentState === "dialog"){
         return (
             <>
-                <MantineProvider defaultColorScheme="light">
-                    <Container style={{
-                        position: 'absolute',
-                        left: left,
-                        top: top,
-                        border: '1px solid',
-                        borderRadius: '5px',
-                        minWidth: '40em',
-                        opacity: '1',
-                        backgroundColor: '#eeeeee',
-                        color: 'black',
+                <MantineProvider>
+                    <Container
+                        ref={containerElement}
+                        style={{
+                            position: 'absolute',
+                            left: left,
+                            top: top,
+                            border: '1px solid',
+                            borderRadius: '5px',
+                            minWidth: '40em',
                         }}
                         size={"sm"}
                     >
