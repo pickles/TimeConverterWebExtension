@@ -1,14 +1,19 @@
-import { Autocomplete, Button, Container, Group, MantineProvider, TextInput } from "@mantine/core"
-import mainContainerCss from './css/MainContainer.module.css';
 import { useState } from "react";
-import TZTable from "./TZTable";
 import { useStorage } from "@plasmohq/storage/hook";
+import { Autocomplete, Button, IconButton, Stack, TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SaveIcon from '@mui/icons-material/Save';
+import TZTable from "./TZTable";
 
 const DateConverter = () => {
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
     const [targetLocale, setTargetLocale] = useStorage("targetLocale", "en");
     const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
-    const [outFormat, setOutFormat] = useStorage("format", "yyyy-MM-dd HH:mm:ss ZZZ");
+    const [format, setFormat, {
+        setRenderValue,
+        setStoreValue,
+        remove
+    }] = useStorage("format", (v) => v === undefined ? "yyyy-MM-dd HH:mm:ss ZZZ": v);
 
     const [dateToConvert, setDateToConvert] = useState("");
     const [selectedTimezone, setSelectedTimezone] = useState("");
@@ -19,62 +24,81 @@ const DateConverter = () => {
         if (selectedTimezone === "") {
           return;
         }
+        if (targetTimezones.includes(selectedTimezone)) {
+          return;
+        }
         setTargetTimezones([...targetTimezones, selectedTimezone]);
-      };
+        setSelectedTimezone("");
+    };
     
-      const handleDeleteTimezone = (timezone) => {
+    const handleDeleteTimezone = (timezone) => {
         setTargetTimezones(targetTimezones.filter((tz) => tz !== timezone));
-      };
+    };
 
     return (
-        <>
-            <Container classNames={mainContainerCss}>
-                <Group>
-                    <TextInput 
-                        label="DateToConvert" 
-                        styles={{input: {width: '25em'}}}
-                        value={dateToConvert}
-                        onChange={(e) => setDateToConvert(e.currentTarget.value)} />
+        <Stack sx={{minWidth: '60em', minHeight: '20em', borderRadius: '10px'}} spacing={2}>
+            <Stack direction="row" spacing={"0.5em"}>
+                <TextField
+                    key="dateToConvertField"
+                    label="Date to convert"
+                    size="small"
+                    value={dateToConvert}
+                    style={{width: '30em'}}
+                    onChange={(e) => setDateToConvert(e.currentTarget.value)} />
+                
+                <TextField
+                    key="LCField"
+                    label="LC"
+                    size="small"
+                    value={targetLocale}
+                    style={{width: '7em'}}
+                    onChange={(e) => setTargetLocale(e.currentTarget.value)} />
 
-                    <TextInput
-                        label="Locale"
-                        styles={{input: {maxWidth: '5em'}}}
-                        value={targetLocale}
-                        onChange={(e) => setTargetLocale(e.currentTarget.value)} />
-                    
-                    <Autocomplete
-                        label="Default TZ"
-                        styles={{input: {maxWidth: '10em'}}}
-                        data={options}
-                        value={defaultTimezone}
-                        onChange={setDefaultTimezone} />
-                    
-                </Group>
+                <Autocomplete
+                    disablePortal
+                    value={defaultTimezone}
+                    onChange={(event, newValue) => { setDefaultTimezone(newValue);}}
+                    options={options}
+                    sx={{width: '13em'}}
+                    renderInput={(params) => <TextField key="TZField" {...params} label="TZ" size="small" fullWidth />}
+                />
+            </Stack>
 
-                <Group style={{marginTop: '0.5em', marginBottom: '0.5em'}}>
-                    <Autocomplete
-                        placeholder="Pick a timezone to convert"
-                        styles={{input: {width: '25em'}}}
-                        data={options}
-                        onChange={setSelectedTimezone} />
-                    <Button onClick={handleAddTimezone}>+</Button>
-                </Group>
+            <Stack direction={'row'} spacing={"0.5em"}>
+                <Autocomplete
+                    disablePortal
+                    value={selectedTimezone}
+                    onChange={(event, newValue) => { setSelectedTimezone(newValue);}}
+                    options={options}
+                    sx={{width: '25em'}}
+                    renderInput={(params) => <TextField key="TZsField" {...params} label="Pick a timezone to convert" size="small" />}
+                />
+                <IconButton onClick={handleAddTimezone}>
+                    <AddIcon />
+                </IconButton>
+            </Stack>
 
-                <TextInput
-                    label="Format"
-                    value={outFormat}
-                    styles={{input: {maxWidth: '25em', marginBottom: '1em'}}}
-                    onChange={(e) => setOutFormat(e.currentTarget.value)} />
+            <Stack direction={'row'} spacing={"0.5em"}>
+                <TextField
+                        key="outFormatField"
+                        label="Format"
+                        size="small"
+                        value={format}
+                        style={{width: '25em'}}
+                        onChange={(e) => setRenderValue(e.currentTarget.value)} />
+                <IconButton onClick={() => setStoreValue(format)}>
+                    <SaveIcon />
+                </IconButton>
+            </Stack>
 
-                <TZTable
-                    targetTimezones={targetTimezones}
-                    dateToConvert={dateToConvert}
-                    targetLocale={targetLocale}
-                    defaultTimezone={defaultTimezone}
-                    format={outFormat}
-                    handleDeleteRow={handleDeleteTimezone} />
-            </Container>
-        </>
+            <TZTable
+                targetTimezones={targetTimezones}
+                dateToConvert={dateToConvert}
+                targetLocale={targetLocale}
+                defaultTimezone={defaultTimezone}
+                format={format}
+                handleDeleteRow={handleDeleteTimezone} />
+        </Stack>
     );
 };
 

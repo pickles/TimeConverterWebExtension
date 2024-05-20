@@ -10,9 +10,11 @@
     "package": "plasmo package"
   },
   "dependencies": {
-    "@formkit/tempo": "^0.1.1",
-    "@mantine/core": "^7.9.1",
-    "@mantine/hooks": "^7.9.1",
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.18",
+    "@mui/material": "^5.15.18",
     "@plasmohq/storage": "^1.10.0",
     "any-date-parser": "^1.5.4",
     "full-icu": "^1.5.0",
@@ -21,7 +23,6 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^5.2.1",
-    "react-select": "^5.8.0",
     "tzdata": "^1.0.40"
   },
   "devDependencies": {

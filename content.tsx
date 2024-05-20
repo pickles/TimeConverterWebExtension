@@ -1,17 +1,23 @@
-import { ActionIcon, Container, Group, MantineProvider, Text, TextInput, Tooltip } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
-import { BsClockHistory } from "react-icons/bs";
 import { useStorage } from "@plasmohq/storage/hook";
 import TZTable from "./TZTable";
 
-// import "@mantine/core/styles.css";
-import globalCss from "data-text:@mantine/core/styles.css";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 
-export const getStyle = () => {
-    const style = document.createElement('style');
-    style.textContent = globalCss;
-    return style;
-};
+import { Autocomplete, Button, Container, IconButton, Stack, TextField, Tooltip } from "@mui/material";
+import TimeIcon from "@mui/icons-material/AccessTime";
+import SaveIcon from "@mui/icons-material/Save";
+
+const styleElement = document.createElement("style");
+
+const styleCache = createCache({
+    key: "plasmo-emotion-cache",
+    prepend: true,
+    container: styleElement
+});
+
+export const getStyle = () => styleElement;
 
 const isInsideDialog = (containerElement, mouseEvent) => {
     if (containerElement === null || containerElement === undefined) {
@@ -26,6 +32,7 @@ const isInsideDialog = (containerElement, mouseEvent) => {
 };
 
 const Content = () => {
+    console.log("Content");
     const [contentState, setContentState] = useState("none");
     const [selectedText, setSelectedText] = useState("");
     const [selectionRect, setSelectionRect] = useState(new DOMRect(0,0,0,0));
@@ -33,9 +40,15 @@ const Content = () => {
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
     const [targetLocale, setTargetLocale] = useStorage("targetLocale", "en");
     const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
-    const [displayFormat, setDisplayFormat] = useStorage("format", "yyyy-MM-dd HH:mm:ss ZZZ");
+    const [displayFormat, setDisplayFormat, {
+        setRenderValue,
+        setStoreValue,
+        remove
+    }] = useStorage("format");
 
     const containerElement = useRef(null);
+
+    const options = ["UTC", ...Intl.supportedValuesOf("timeZone")];
 
     const handleMouseUp = (e: MouseEvent) => {
         if (contentState === "icon") {
@@ -99,78 +112,92 @@ const Content = () => {
         return (<div ref={containerElement}></div>);
     } else if (contentState === "icon") {
         return (
-            <MantineProvider>
-                <Container 
-                    ref={containerElement}
-                    style={{
-                        position: 'absolute',
-                        left: left,
-                        top: top,
-                    }}
-                >
-                    <Tooltip label="Convert time" withArrow>
-                        <ActionIcon onClick={handleIconClick} style={{
-                            backgroundColor: "white",
-                            borderRadius: '50%',
-                            width: '2em',
-                            height: '2em',
-                            justifyContent: 'center',
-                            boxShadow: '0 10px 25px 0 rgba(0, 0, 0, 0.8)',
-                            }}>
-                            <BsClockHistory size={'1.5em'} color="black"/>
-                        </ActionIcon>
-                    </Tooltip>
-                </Container>
-            </MantineProvider>
-        );
-    } else if (contentState === "dialog"){
-        return (
-            <MantineProvider>
+            <CacheProvider value={styleCache}>
                 <Container
                     ref={containerElement}
-                    style={{
+                    sx={{
                         position: 'absolute',
-                        left: left,
                         top: top,
-                        border: '1px solid',
-                        borderRadius: '5px',
-                        minWidth: '50em',
-                        backgroundColor: 'white',
-                        color: 'black',
-                        padding: '1em',
-                        boxShadow: '0 10px 25px 0 rgba(0, 0, 0, 0.8)',
+                        left: left
                     }}
                 >
-                    <Group>
-                        <TextInput label={"Selection"} value={selectedText} contentEditable={false} styles={{input: {width: '25em', color: 'black'}}} readOnly/>
-                        <TextInput label={"LC"} value={targetLocale} contentEditable={false} styles={{input: {width: '5em', color: 'black'}}} readOnly/>
-                        <TextInput label={"TZ"} value={defaultTimezone} contentEditable={false} styles={{input: {width: '5em', color: 'black'}}} readOnly/>
-                    </Group>
+                    <IconButton
+                        sx={{backgroundColor: 'white', boxShadow: '0 10px 25px 0 rgba(0, 0, 0, 0.8)'}}
+                        onClick={handleIconClick}
+                    >
+                        <TimeIcon />
+                    </IconButton>
+                </Container>
+            </CacheProvider>
+        )
+    } else if (contentState === "dialog") {
+        return (
+            <CacheProvider value={styleCache}>
+                <Stack
+                    spacing={"0.5em"}
+                    ref={containerElement}
+                    sx={{
+                        position: 'absolute', 
+                        top: top, 
+                        left: left,
+                        backgroundColor: 'white',
+                        borderRadius: '5px',
+                        minWidth: '50em',
+                        padding: '0.5em',
+                        boxShadow: '0 10px 25px 0 rgba(0, 0, 0, 0.8)'
+                    }}
+                >
+                    <Stack direction="row" spacing={"0.5em"}>
+                        <TextField
+                            label="Date to convert"
+                            size="small"
+                            value={selectedText}
+                            onChange={(e) => setSelectedText(e.currentTarget.value)}
+                            fullWidth />
 
-                    {/* TODO: Investigate why the cursor jumps to the end of the line each time a character is entered when "Value" is used here. */}
-                    <TextInput
-                        label="Format"
-                        // value={displayFormat}
-                        defaultValue={displayFormat}
-                        styles={{input: {maxWidth: '25em', marginBottom: '1em'}}}
-                        onChange={(e) => setDisplayFormat(e.currentTarget.value)} />
+                        <TextField
+                            label="LC"
+                            size="small"
+                            value={targetLocale}
+                            style={{width: '7em'}}
+                            onChange={(e) => setTargetLocale(e.currentTarget.value)} />
+
+                        <Autocomplete
+                            disablePortal
+                            value={defaultTimezone}
+                            onChange={(event, newValue) => { setDefaultTimezone(newValue) }}
+                            options={options}
+                            sx={{width: '13em'}}
+                            renderInput={(params) => <TextField {...params} label="TZ" size="small"  />} />
+                    </Stack>
+
+                    <Stack direction="row" spacing={"0.5em"}>
+                        <TextField
+                            key="displayFormatField"
+                            label="Format"
+                            size="small"
+                            value={displayFormat}
+                            style={{width: '30em'}}
+                            onChange={(e) => setRenderValue(e.currentTarget.value)} />
+
+                        <IconButton onClick={() => setStoreValue()}>
+                            <SaveIcon />
+                        </IconButton>
+                    </Stack>
 
                     <TZTable 
-                            targetTimezones={targetTimezones}
-                            dateToConvert={selectedText}
-                            targetLocale={targetLocale}
-                            defaultTimezone={defaultTimezone}
-                            format={displayFormat}
-                    />
-                </Container>
-            </MantineProvider>
+                        targetTimezones={targetTimezones}
+                        dateToConvert={selectedText}
+                        targetLocale={targetLocale}
+                        defaultTimezone={defaultTimezone}
+                        format={displayFormat}
+                        />
+                </Stack>
+            </CacheProvider>
         );
-    
     } else {
-        console.log("unknown content state: ", contentState);
         return (<div ref={containerElement}></div>);
     }
-
 };
 
 export default Content;

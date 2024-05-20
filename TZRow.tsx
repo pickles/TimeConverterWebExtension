@@ -1,7 +1,8 @@
 const parser = require('any-date-parser');
 import { DateTime } from 'luxon';
-import { MdDone, MdOutlineContentCopy } from 'react-icons/md';
-import { ActionIcon, Button, CopyButton, Table, Tooltip } from '@mantine/core';
+import { IconButton, TableCell, TableRow } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CopyButton from '~CopyButton';
 
 function convert(dateStrToConvert: string, targetTimezone: string, locale: string, defaultParseTimezone: string, format="yyyy-MM-dd HH:mm:ss ZZZ"): string {
     try {
@@ -81,9 +82,9 @@ function TZRow(props: {
     // "ZZZZ" pattern requires locale to be set properly, otherwise it returns like "GMT+09:00"
     // so it requires to get offsetLongName and remove all lowercase letters and spaces to make abbreviation like JST
     const longOffsetName = currentDateTimeWithTargetTimezone.toFormat("ZZZZZ", {locale: "en"});
-    console.log(longOffsetName);
     const offsetName = longOffsetName.replace(/[^A-Z]/g, "");
-    const current = currentDateTimeWithTargetTimezone.toFormat("yyyy-MM-dd HH:mm:ss") + " " + offsetName;
+    const format2 = props.format.replace(/Z3/g, `'${offsetName}'`);
+    const current = currentDateTimeWithTargetTimezone.toFormat(format2, {locale: props.locale});
 
     let converted = "-";
 
@@ -96,46 +97,37 @@ function TZRow(props: {
     };
 
     const copyText = (e: MouseEvent, text: string) => {
-        navigator.clipboard.writeText(text)
+        navigator.clipboard.writeText(text);
+
     };
 
     const shouldShowDelete = props.targetTimezone != "UTC" && props.onDelete != null;
 
     return (
-        <Table.Tr>
-            <Table.Td>
+        <TableRow>
+            <TableCell>
                 {props.targetTimezone}
-            </Table.Td>
-            <Table.Td>
+            </TableCell>
+            <TableCell>
                 {current}
-                <CopyButton value={current}>
-                    {({copied, copy}) => (
-                        <Tooltip label={copied ? "Copied!" : "Copy to clipboard"} withArrow>
-                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"}>
-                                {copied ? <MdDone /> : <MdOutlineContentCopy />}
-                            </ActionIcon>
-                        </Tooltip>
-                    )}
-                </CopyButton>
-            </Table.Td>
-            <Table.Td>
+                <CopyButton text={current} />
+            </TableCell>
+            <TableCell>
                 {converted}
-                { converted !== "-" && 
-                <CopyButton value={converted}>
-                    {({copied, copy}) => (
-                        <Tooltip label={copied ? "Copied!" : "Copy to clipboard"} withArrow>
-                            <ActionIcon onClick={copy} styles={{root: {marginLeft: "10px"}}} size={"xs"}>
-                                {copied ? <MdDone /> : <MdOutlineContentCopy />}
-                            </ActionIcon>
-                        </Tooltip>
-                    )}
-                </CopyButton>
+                { converted !== "-" &&
+                    <CopyButton text={converted} />
                 }
-            </Table.Td>
-            <Table.Td>
-                { shouldShowDelete && <button onClick={handleDelete}>x</button>}
-            </Table.Td>
-        </Table.Tr>
+            </TableCell>
+            { props.onDelete !== null &&
+            <TableCell>
+                { props.targetTimezone !== "UTC" &&
+                <IconButton onClick={handleDelete}>
+                    <DeleteIcon />
+                </IconButton>
+                }
+            </TableCell>
+            }
+        </TableRow>
     );
 }
 

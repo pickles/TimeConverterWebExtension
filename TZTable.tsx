@@ -1,4 +1,4 @@
-import { Table } from "@mantine/core";
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import TZRow from "./TZRow";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
@@ -34,22 +34,27 @@ const TZTable = ({
         });
     };
 
+    const shouldShowDelete = (handleDeleteRow != null);
+
+
     return (
-        <>
-            <Table>
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>Name</Table.Th>
-                        <Table.Th>Current</Table.Th>
-                        <Table.Th>Converted</Table.Th>
-                        <Table.Th></Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
+        <TableContainer component={Paper}>
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Current</TableCell>
+                        <TableCell>Converted</TableCell>
+                        { shouldShowDelete &&
+                        <TableCell>Del</TableCell>
+                        }
+                    </TableRow>
+                </TableHead>
+                <TableBody>
                     {generateRows()}
-                </Table.Tbody>
+                </TableBody>
             </Table>
-        </>
+        </TableContainer>
     );
 }
 
