@@ -1,7 +1,7 @@
 {
   "name": "time-converter",
   "displayName": "Time converter",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Convert the timzone",
   "author": "Manabu Shibata",
   "scripts": {
@@ -19,7 +19,7 @@
     "any-date-parser": "^1.5.4",
     "full-icu": "^1.5.0",
     "luxon": "^3.4.4",
-    "plasmo": "0.86.2",
+    "plasmo": "0.86.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^5.2.1",
@@ -41,13 +41,16 @@
     "typescript": "5.3.3"
   },
   "manifest": {
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "manabu.shibata@gmail.com"
+      }
+    },
     "host_permissions": [
-      "https://*/*",
-      "ws://*/*"
+      "https://*/*"
     ],
     "permissions": [
-      "scripting",
-      "contextMenus"
+      "scripting"
     ]
   }
 }

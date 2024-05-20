@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useStorage } from "@plasmohq/storage/hook";
-import { Autocomplete, Button, IconButton, Stack, TextField } from '@mui/material';
+import { Autocomplete, Button, IconButton, Stack, TextField, ThemeProvider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
 import TZTable from "./TZTable";
