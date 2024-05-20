@@ -8,11 +8,12 @@ const DateConverter = () => {
     const [targetTimezones, setTargetTimezones] = useStorage("targetTimezones", ["UTC"]);
     const [targetLocale, setTargetLocale] = useStorage("targetLocale", "en");
     const [defaultTimezone, setDefaultTimezone] = useStorage("defaultTimezone", "UTC");
+    const [outFormat, setOutFormat] = useStorage("format", "yyyy-MM-dd HH:mm:ss ZZZ");
 
     const [dateToConvert, setDateToConvert] = useState("");
     const [selectedTimezone, setSelectedTimezone] = useState("");
     
-    const options = Intl.supportedValuesOf("timeZone");
+    const options = ["UTC", ...Intl.supportedValuesOf("timeZone")];
 
     const handleAddTimezone = () => {
         if (selectedTimezone === "") {
@@ -41,15 +42,16 @@ const DateConverter = () => {
                         value={targetLocale}
                         onChange={(e) => setTargetLocale(e.currentTarget.value)} />
                     
-                    <TextInput
+                    <Autocomplete
                         label="Default TZ"
-                        styles={{input: {maxWidth: '5em'}}}
+                        styles={{input: {maxWidth: '10em'}}}
+                        data={options}
                         value={defaultTimezone}
-                        onChange={(e) => setDefaultTimezone(e.currentTarget.value)} />
+                        onChange={setDefaultTimezone} />
                     
                 </Group>
 
-                <Group styles={{root: {marginTop: '1em', marginBottom: '1em'}}}>
+                <Group style={{marginTop: '0.5em', marginBottom: '0.5em'}}>
                     <Autocomplete
                         placeholder="Pick a timezone to convert"
                         styles={{input: {width: '25em'}}}
@@ -58,11 +60,18 @@ const DateConverter = () => {
                     <Button onClick={handleAddTimezone}>+</Button>
                 </Group>
 
+                <TextInput
+                    label="Format"
+                    value={outFormat}
+                    styles={{input: {maxWidth: '25em', marginBottom: '1em'}}}
+                    onChange={(e) => setOutFormat(e.currentTarget.value)} />
+
                 <TZTable
                     targetTimezones={targetTimezones}
                     dateToConvert={dateToConvert}
                     targetLocale={targetLocale}
                     defaultTimezone={defaultTimezone}
+                    format={outFormat}
                     handleDeleteRow={handleDeleteTimezone} />
             </Container>
         </>
